@@ -1,0 +1,22 @@
+# dependencies
+node_modules/
+.pnpm-store/
+
+# next.js
+.next/
+out/
+public/sw.js
+
+# build
+standalone/
+standalone.tar
+
+# env
+.env
+.env.local
+.env.production
+
+# misc
+.DS_Store
+*.tsbuildinfo
+next-env.d.ts

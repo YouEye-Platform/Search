@@ -1,0 +1,147 @@
+apiVersion: v1
+kind: app
+integration: native
+version: 0.5.0
+surfaceSchemaVersion: 1
+metadata:
+  id: "search"
+  name: "Search"
+  description: "Privacy-respecting web search. Results are fetched through your connected search backend — no tracking, no profiling."
+  icon: "search"
+  category: "search"
+  website: "https://github.com/YouEye-Platform/Search"
+  tags: ["search", "privacy", "searxng", "native"]
+  defaultSubdomain: "search"
+
+detail:
+  longDescription: |
+    YouEye Search is a privacy-respecting search app that routes all queries through
+    your connected search backend. Supports web, images, news, and video search with
+    configurable search engine backends (SearXNG, Whoogle, etc). No search data
+    is stored, tracked, or profiled. Integrates with YouEye SSO and supports dark mode.
+
+capabilities:
+  widgets: true
+  settings_panel: true
+
+surfaces:
+  - id: app-settings
+    kind: settings-panel
+    placement: app-settings
+    name: App Settings
+    description: App-owned settings panel
+    embedPath: /embed/settings
+    permissions: []
+  - id: quick-search
+    kind: widget
+    placement: dashboard
+    name: Quick Search
+    description: Search bar widget for your dashboard
+    embedPath: /embed/widget/quick-search
+    permissions: []
+    defaultSize:
+      width: 30
+      height: 7
+    minSize:
+      width: 20
+      height: 5
+    maxSize:
+      width: 50
+      height: 12
+  - id: search-query
+    kind: timeline-card
+    placement: timeline
+    name: Search query
+    description: Web search performed
+    embedPath: /embed/timeline/search
+    permissions:
+      - timeline:write
+    triggers:
+      - search-query
+  - id: search-link-clicked
+    kind: timeline-card
+    placement: timeline
+    name: Search result click
+    description: Search result link clicked
+    embedPath: /embed/timeline/search
+    permissions:
+      - timeline:write
+    triggers:
+      - search-link-clicked
+
+wants:
+  - type: search-engine
+    name: Search Engine
+    description: "Any compatible search engine backend (SearXNG, Whoogle, etc.)"
+    defaultPort: 8080
+  - appId: searxng
+    name: SearXNG
+    description: "Private meta-search engine"
+    defaultPort: 8080
+    proxy:
+      paths:
+        - /search*
+        - /autocompleter*
+      methods:
+        - GET
+  - appId: whoogle
+    name: Whoogle
+    description: "Privacy search frontend"
+    defaultPort: 3000
+internet:
+  hosts: []
+
+database:
+  mode: none
+
+containers:
+  - name: main
+    type: lxd
+    image: debian/12
+    port: 3000
+    primary: true
+    network: isolated
+    source:
+      repo: YouEye-Platform/Search
+      nodeVersion: "22.x"
+      appDir: /opt/app
+    healthCheck:
+      type: http
+      path: /api/health
+      timeout: 120000
+
+secrets:
+  - name: jwt_secret
+    file: .jwt_secret
+    generator: secretKey
+    length: 64
+
+backup:
+  strategy: "stop-dump-export"
+  volumes: []
+
+sso:
+  type: oauth2
+  callback_path: /api/auth/callback
+  setup:
+    method: env
+
+env_mapping:
+  JWT_SECRET: "${secrets.jwt_secret}"
+  IDENTITY_URL: "${identity.externalUrl}"
+  IDENTITY_INTERNAL_URL: "${identity.internalUrl}"
+  IDENTITY_CLIENT_ID: "${sso.client_id}"
+  IDENTITY_CLIENT_SECRET: "${sso.client_secret}"
+  APP_URL: "${app.url}"
+  SEARCH_EXTERNAL_URL: "${app.url}"
+  YOUEYE_GATEWAY: "${integration.gateway_url}"
+  YOUEYE_APP_TOKEN: "${integration.app_token}"
+  YOUEYE_APP_ID: "${app.id}"
+  NODE_ENV: production
+  PORT: "3000"
+  HOSTNAME: "0.0.0.0"
+
+update:
+  strategy: replace
+  preserveData: true
+  preserveSecrets: true
