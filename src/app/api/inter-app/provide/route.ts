@@ -1,6 +1,6 @@
 import { createInterAppHandler } from "@/lib/routes/inter-app";
 
-export const POST = createInterAppHandler({
+export const POST = createInterAppHandler("ye-search", {
   search: async (data) => {
     const baseUrl =
       process.env.SEARCH_ENGINE_URL?.replace("app-searxng.youeye", "app-searxng-main.youeye") ??

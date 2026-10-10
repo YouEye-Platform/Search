@@ -16,8 +16,8 @@ test("Search surfaces launch requirements before using declared permissions", ()
   const types = read("src/lib/types/index.ts");
 
   assert.match(api, /getLaunchRequirements\(userId: string, returnTo\?: string\)/);
-  assert.ok(api.includes('process.env.YOUEYE_APP_ID || appId.replace(/^ye-/, "")'));
-  assert.ok(api.includes('"X-YouEye-App": platformAppId'));
+  assert.ok(api.includes('process.env.YOUEYE_APP_ID || appId'));
+  assert.ok(api.includes('appServiceHeaders(options.headers, userId)'));
   assert.match(api, /launch-requirements/);
   assert.ok(api.includes("encodeURIComponent(platformAppId)"));
   assert.match(layout, /api\.getLaunchRequirements\(session\.userId, process\.env\.SEARCH_EXTERNAL_URL/);

@@ -12,9 +12,7 @@ function read(path) {
 test('Search sends its app token when discovering connections', () => {
   const source = read('src/lib/connections/index.ts');
 
-  assert.match(source, /const YOUEYE_APP_TOKEN = process\.env\.YOUEYE_APP_TOKEN/);
-  assert.match(source, /Authorization: `Bearer \$\{YOUEYE_APP_TOKEN\}`/);
-  assert.match(source, /"X-YouEye-App": YOUEYE_APP_ID \|\| ""/);
-  assert.match(source, /"X-YouEye-User": userId/);
+  assert.match(source, /appServiceHeaders\(undefined, userId\)/);
+  assert.match(source, /appServiceHeaders\(extra, userId\)/);
   assert.match(source, /\/my-connections/);
 });

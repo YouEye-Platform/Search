@@ -1,3 +1,4 @@
+import { appServiceHeaders } from "../api/service-headers";
 /**
  * @youeye/canvas/connections — Discovery API client
  *
@@ -49,8 +50,6 @@ export interface ConnectionStatus {
 let _cache: { data: ConnectionStatus; ts: number; userId?: string } | null = null;
 const CACHE_TTL = 30_000;
 
-const YOUEYE_APP_ID = process.env.YOUEYE_APP_ID;
-const YOUEYE_APP_TOKEN = process.env.YOUEYE_APP_TOKEN;
 
 /** Resolve the YE-UI API URL from env vars. Prefers YOUEYE_API_URL, falls back to YOUEYE_GATEWAY. */
 function resolveApiUrl(): string {
@@ -83,11 +82,8 @@ export async function getConnections(userId?: string): Promise<ConnectionStatus>
   const apiUrl = resolveApiUrl();
 
   const res = await fetch(`${apiUrl}/my-connections`, {
-    headers: {
-      "X-YouEye-App": YOUEYE_APP_ID || "",
-      ...(userId ? { "X-YouEye-User": userId } : {}),
-      ...(YOUEYE_APP_TOKEN ? { Authorization: `Bearer ${YOUEYE_APP_TOKEN}` } : {}),
-    },
+    headers: appServiceHeaders(undefined, userId),
+        redirect: "error",
     cache: "no-store",
   });
 
@@ -112,17 +108,14 @@ export function connectionProxyUrl(targetAppId: string, path: string = ""): stri
 }
 
 export function connectionHeaders(extra?: HeadersInit, userId?: string): HeadersInit {
-  const headers = new Headers(extra);
-  if (YOUEYE_APP_ID) headers.set("X-YouEye-App", YOUEYE_APP_ID);
-  if (userId) headers.set("X-YouEye-User", userId);
-  if (YOUEYE_APP_TOKEN) headers.set("Authorization", `Bearer ${YOUEYE_APP_TOKEN}`);
-  return headers;
+  return appServiceHeaders(extra, userId);
 }
 
 export async function connectionFetch(targetAppId: string, path: string = "", init: RequestInit = {}, userId?: string): Promise<Response> {
   return fetch(connectionProxyUrl(targetAppId, path), {
     ...init,
     headers: connectionHeaders(init.headers, userId),
+    redirect: "error",
   });
 }
 
