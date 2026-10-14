@@ -32,7 +32,7 @@ export default async function SearchPage({
     <div className="min-h-[calc(100vh-3.5rem)]">
       {/* Category tabs — scroll with content, search bar stays in header */}
       <div className="px-4 pt-4 pb-0 lg:pl-[5%] xl:pl-[10%]">
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 overflow-x-auto">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             const isActive = category === cat.key;
@@ -41,7 +41,7 @@ export default async function SearchPage({
               <Link
                 key={cat.key}
                 href={href}
-                className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm transition-colors ${
+                className={`flex shrink-0 items-center gap-1.5 rounded-full px-4 py-2 text-sm transition-colors ${
                   isActive
                     ? "bg-blue-100 font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
                     : "text-muted-foreground hover:bg-accent"

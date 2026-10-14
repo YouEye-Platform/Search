@@ -4,7 +4,7 @@ Private search app for the [YouEye](https://github.com/YouEye-Platform/YouEye) p
 
 Search runs as a native YouEye app. It connects to a compatible search backend through YouEye, gives users a focused search interface, and exposes dashboard and timeline surfaces to the platform.
 
-Current development source version: `0.4.4.1.0.2`
+The version in `package.json` and `youeye-app.yaml` is the exact source version.
 
 ## Features
 

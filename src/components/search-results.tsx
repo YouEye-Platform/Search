@@ -100,7 +100,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
       {/* Content area — two-column layout */}
       <div className="flex gap-8 px-4 py-6 lg:px-[5%] xl:px-[10%]">
         {/* Main column */}
-        <div className="min-w-0 w-[640px] shrink-0">
+        <div className="min-w-0 w-full max-w-[640px] lg:flex-1">
           {/* Loading skeleton */}
           {loading && renderSkeleton()}
 
@@ -108,7 +108,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
           {!loading && error && (
             <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
               <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
-              <div className="flex-1">
+              <div className="min-w-0 flex-1 break-words">
                 <p className="font-medium text-foreground">Search unavailable</p>
                 <p className="mt-1 text-sm text-muted-foreground">{error}</p>
                 <button
@@ -242,7 +242,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
         </div>
 
         {/* RHS Sidebar — desktop only */}
-        <aside className="hidden flex-1 min-w-[400px] lg:block">
+        <aside className="hidden w-[400px] shrink-0 lg:block">
           {loading ? (
             <SidebarSkeleton />
           ) : (
