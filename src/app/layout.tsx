@@ -1,3 +1,4 @@
+import { resolveAppLocale } from "@/lib/locale";
 /**
  * Root Layout — Search App (Canvas SDK)
  */
@@ -63,7 +64,7 @@ export default async function RootLayout({
   const htmlClass = isSystemTheme ? "" : themeMode;
 
   return (
-    <html lang="en" className={htmlClass} suppressHydrationWarning>
+    <html lang={resolveAppLocale(headerConfig?.locale)} className={htmlClass} suppressHydrationWarning>
       <head>
         {isSystemTheme && (
           <script dangerouslySetInnerHTML={{ __html: generateSystemThemeScript() }} />
