@@ -1,4 +1,8 @@
-import { resolveAppLocale } from "@/lib/locale";
+import { NextIntlClientProvider } from "next-intl";
+import { getTranslations as getInterfaceTranslations, getMessages } from "next-intl/server";
+import { localeDirection } from "@/lib/locale";
+import { getAppLocale } from "@/i18n/runtime";
+import { LocaleRefresh } from "@/components/locale-refresh";
 /**
  * Root Layout — Search App (Canvas SDK)
  */
@@ -21,9 +25,10 @@ import { Search } from "lucide-react";
 
 export async function generateMetadata(): Promise<Metadata> {
   const appName = process.env.APP_NAME || "Search";
+  const translateInterface = await getInterfaceTranslations("interface");
   return {
     title: appName,
-    description: "Privacy-respecting web search",
+    description: translateInterface("m1cd4148c0cb7"),
     icons: { icon: "/api/pwa/icon?size=32" },
     appleWebApp: {
       capable: true,
@@ -37,7 +42,6 @@ export const viewport: Viewport = {
   themeColor: "#10b981",
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
 };
 
 export default async function RootLayout({
@@ -63,8 +67,11 @@ export default async function RootLayout({
   const isSystemTheme = themeMode === "system";
   const htmlClass = isSystemTheme ? "" : themeMode;
 
+  const locale = await getAppLocale();
+  const messages = await getMessages({ locale });
+
   return (
-    <html lang={resolveAppLocale(headerConfig?.locale)} className={htmlClass} suppressHydrationWarning>
+    <html lang={locale} dir={localeDirection(locale)} className={htmlClass} suppressHydrationWarning>
       <head>
         {isSystemTheme && (
           <script dangerouslySetInnerHTML={{ __html: generateSystemThemeScript() }} />
@@ -77,6 +84,8 @@ export default async function RootLayout({
         )}
       </head>
       <body className="min-h-screen bg-background text-foreground antialiased">
+        <NextIntlClientProvider locale={locale} messages={messages}>
+        <LocaleRefresh locale={locale} endpoint="/api/locale" />
         {session && (
           <>
             <AppHeader
@@ -93,6 +102,7 @@ export default async function RootLayout({
         )}
         <main>{children}</main>
         <InstallBanner appName="Search" />
+        </NextIntlClientProvider>
       </body>
     </html>
   );

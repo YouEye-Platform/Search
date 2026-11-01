@@ -1,4 +1,4 @@
-
+import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 /**
  * AppHeader — the universal YouEye header, identical across the UI, Settings,
@@ -72,6 +72,7 @@ export async function AppHeader({
   appMenuItems,
   children,
 }: AppHeaderProps) {
+  const translateInterface = await getTranslations("interface");
   const session = await getSession();
   if (!session) return null;
 
@@ -94,7 +95,7 @@ export async function AppHeader({
   // Merge caller-supplied app menu items with the platform-provided "App Settings" link
   const mergedAppItems = [
     ...(appMenuItems ?? []),
-    ...(appSettingsUrl ? [{ label: "App Settings", icon: "Sliders", href: appSettingsUrl }] : []),
+    ...(appSettingsUrl ? [{ label: translateInterface("mda645334193e"), icon: "Sliders", href: appSettingsUrl }] : []),
   ];
 
   // Per-app branding (Plan 4 Phase 0). The full app list is stripped from
@@ -153,10 +154,10 @@ export async function AppHeader({
 
   return (
     <>
-      <header className="ye-mobile-top-header sticky top-0 z-50 grid h-14 grid-cols-[minmax(0,1fr)_minmax(0,640px)_minmax(0,1fr)] items-center gap-3 border-b border-border/40 bg-background/95 px-4 backdrop-blur-md">
+      <header className="ye-mobile-top-header sticky top-0 z-50 grid h-14 grid-cols-[minmax(0,auto)_minmax(0,640px)_minmax(max-content,1fr)] items-center gap-5 border-b border-border/40 bg-background/95 px-4 backdrop-blur-md">
         <Link
           href="/"
-          className="flex min-w-0 items-center justify-start gap-2 font-semibold text-foreground hover:text-foreground/80 transition-colors"
+          className="flex min-w-0 max-w-40 items-center justify-start gap-2 overflow-hidden font-semibold text-foreground hover:text-foreground/80 transition-colors"
           title={displayName}
          prefetch={false}>
           {displayMode !== "text-only" && renderedIcon}
@@ -169,11 +170,11 @@ export async function AppHeader({
                 charTransforms={brandingCssChars}
               />
             ) : (
-              <span>{displayName}</span>
+              <span className="truncate">{displayName}</span>
             ))}
         </Link>
 
-        <div className="ye-mobile-top-center flex min-w-0 items-center justify-center">{centerContent}</div>
+        <div className="ye-mobile-top-center flex min-w-0 items-center justify-start">{centerContent}</div>
 
         <div className="ye-mobile-top-actions flex min-w-0 items-center justify-end gap-1">
           <HomeButton uiBaseUrl={uiBaseUrl} />

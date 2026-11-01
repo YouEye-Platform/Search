@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations as useInterfaceTranslations } from "next-intl";
 import { useState, useCallback, useEffect } from "react";
 import { X, ChevronLeft, ChevronRight, ExternalLink, Download } from "lucide-react";
 import type { SearchResult } from "@/lib/search";
@@ -23,6 +24,8 @@ function Lightbox({
   onClose: () => void;
   onNav: (i: number) => void;
 }) {
+  const translateInterface = useInterfaceTranslations("interface");
+
   const img = images[index];
 
   useEffect(() => {
@@ -50,8 +53,7 @@ function Lightbox({
             className="flex items-center gap-1 rounded-full bg-black/50 px-3 py-1.5 text-sm text-white hover:bg-black/70 transition-colors"
             onClick={(e) => e.stopPropagation()}
           >
-            <ExternalLink className="h-3.5 w-3.5" /> Open
-          </a>
+            <ExternalLink className="h-3.5 w-3.5" /> {" "}{translateInterface("med077f3d8125")}</a>
           {img.img_src && (
             <a
               href={img.img_src}
@@ -60,8 +62,7 @@ function Lightbox({
               className="flex items-center gap-1 rounded-full bg-black/50 px-3 py-1.5 text-sm text-white hover:bg-black/70 transition-colors"
               onClick={(e) => e.stopPropagation()}
             >
-              <Download className="h-3.5 w-3.5" /> Full size
-            </a>
+              <Download className="h-3.5 w-3.5" /> {" "}{translateInterface("m19aa89534124")}</a>
           )}
         </div>
         <button

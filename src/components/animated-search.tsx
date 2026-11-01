@@ -1,10 +1,13 @@
 "use client";
 
+import { useTranslations as useInterfaceTranslations } from "next-intl";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X, Loader2 } from "lucide-react";
 
 export function AnimatedSearch() {
+  const translateInterface = useInterfaceTranslations("interface");
+
   const router = useRouter();
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -13,7 +16,7 @@ export function AnimatedSearch() {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [focused, setFocused] = useState(false);
 
   // Gradient glow follows cursor
   const [glowPos, setGlowPos] = useState({ x: 0, y: 0, active: false });
@@ -50,34 +53,44 @@ export function AnimatedSearch() {
     [query, navigate],
   );
 
-  const fetchSuggestions = useCallback(async (q: string) => {
-    if (q.length < 2) {
-      setSuggestions([]);
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/suggest?q=${encodeURIComponent(q)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setSuggestions(Array.isArray(data) ? data.slice(0, 8) : []);
+  useEffect(() => {
+    if (query.trim().length < 2 || !focused) return;
+    const controller = new AbortController();
+    let current = true;
+    const timer = setTimeout(async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/suggest?q=${encodeURIComponent(query)}`, { signal: controller.signal });
+        if (res.ok) {
+          const data: unknown = await res.json();
+          if (current) {
+            setSuggestions(Array.isArray(data) ? data.filter((s): s is string => typeof s === "string").slice(0, 8) : []);
+            setShowSuggestions(true);
+          }
+        }
+      } catch {
+        /* suggestions are optional */
+      } finally {
+        if (current) setLoading(false);
       }
-    } catch {
-      /* suggestions are optional */
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+    }, 150);
+    return () => {
+      current = false;
+      clearTimeout(timer);
+      controller.abort();
+    };
+  }, [query, focused]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       const v = e.target.value;
       setQuery(v);
       setSelectedIndex(-1);
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => fetchSuggestions(v), 150);
+      setSuggestions([]);
+      setLoading(false);
+      setFocused(true);
     },
-    [fetchSuggestions],
+    [],
   );
 
   const handleKeyDown = useCallback(
@@ -116,6 +129,13 @@ export function AnimatedSearch() {
       className="relative w-full max-w-xl"
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          setFocused(false);
+          setShowSuggestions(false);
+          setLoading(false);
+        }
+      }}
     >
       {/* Gradient glow layer */}
       <div
@@ -129,17 +149,24 @@ export function AnimatedSearch() {
       {/* Idle gradient border */}
       <div className="absolute -inset-0.5 rounded-full bg-gradient-to-r from-violet-500 via-pink-500 to-blue-500 opacity-30 blur-[1px] animate-gradient-shift" />
 
-      <form onSubmit={handleSubmit} className="relative">
+      <form role="search" onSubmit={handleSubmit} className="relative">
         <div className="relative flex items-center rounded-full bg-background border-2 border-transparent">
           <Search className="absolute left-5 h-5 w-5 text-muted-foreground" />
           <input
             ref={inputRef}
             type="text"
+            aria-label={translateInterface("searchLabel")}
+            role="combobox"
+            aria-autocomplete="list"
+            aria-expanded={showSuggestions && suggestions.length > 0}
+            aria-controls={showSuggestions && suggestions.length > 0 ? "home-search-suggestions" : undefined}
+            aria-activedescendant={showSuggestions && selectedIndex >= 0 ? `home-search-suggestion-${selectedIndex}` : undefined}
+            autoComplete="off"
             value={query}
             onChange={handleChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-            placeholder="Search the web..."
+            onFocus={() => { setFocused(true); if (suggestions.length > 0) setShowSuggestions(true); }}
+            placeholder={translateInterface("me5e6bff7707c")}
             autoFocus
             className="w-full rounded-full bg-transparent py-4 pl-14 pr-14 text-base text-foreground placeholder:text-muted-foreground outline-none"
           />
@@ -149,9 +176,13 @@ export function AnimatedSearch() {
           {query && !loading && (
             <button
               type="button"
+              aria-label={translateInterface("m3b7ea51793e9")}
               onClick={() => {
                 setQuery("");
                 setSuggestions([]);
+                setSelectedIndex(-1);
+                setShowSuggestions(false);
+                setLoading(false);
                 inputRef.current?.focus();
               }}
               className="absolute right-14 rounded-full p-1 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
@@ -161,6 +192,7 @@ export function AnimatedSearch() {
           )}
           <button
             type="submit"
+            aria-label={translateInterface("m49c266baaaa7")}
             className="absolute right-3 rounded-full bg-primary p-2 text-primary-foreground hover:bg-primary/90 transition-colors"
           >
             <Search className="h-4 w-4" />
@@ -170,15 +202,19 @@ export function AnimatedSearch() {
 
       {/* Suggestions dropdown */}
       {showSuggestions && suggestions.length > 0 && (
-        <div className="absolute top-full left-0 right-0 z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
+        <div id="home-search-suggestions" role="listbox" aria-label={translateInterface("searchSuggestions")} className="absolute top-full left-0 right-0 z-50 mt-2 overflow-hidden rounded-2xl border border-border bg-popover shadow-xl">
           {suggestions.map((s, i) => (
             <button
               key={s}
               type="button"
+              id={`home-search-suggestion-${i}`}
+              role="option"
+              aria-selected={i === selectedIndex}
               className={`flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-popover-foreground transition-colors hover:bg-accent ${
                 i === selectedIndex ? "bg-accent" : ""
               }`}
-              onMouseDown={() => navigate(s)}
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => navigate(s)}
             >
               <Search className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
               {s}

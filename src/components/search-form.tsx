@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations as useInterfaceTranslations } from "next-intl";
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Search, X, Loader2 } from "lucide-react";
@@ -14,6 +15,8 @@ interface SearchFormProps {
  * For the homepage animated variant, see AnimatedSearch.
  */
 export function SearchForm({ initialQuery = "", category }: SearchFormProps) {
+  const translateInterface = useInterfaceTranslations("interface");
+
   const router = useRouter();
   const [query, setQuery] = useState(initialQuery);
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -117,7 +120,7 @@ export function SearchForm({ initialQuery = "", category }: SearchFormProps) {
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-          placeholder="Search..."
+          placeholder={translateInterface("m7f55382219f0")}
           className="h-11 w-full rounded-full border border-input bg-background pl-11 pr-20 text-sm text-foreground shadow-sm placeholder:text-muted-foreground outline-none transition-all focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
         />
         {loading && (

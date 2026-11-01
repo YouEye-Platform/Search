@@ -9,20 +9,20 @@ function read(path) {
   return readFileSync(join(root, path), "utf8");
 }
 
-test("Search header uses the YouEye three-zone shell", () => {
+test("Search header keeps the YouEye shell with search beside the app identity", () => {
   const header = read("src/lib/components/layout/app-header.tsx");
   const drawer = read("src/lib/components/layout/app-drawer.tsx");
   const notifications = read("src/lib/components/layout/notification-bell.tsx");
   const userMenu = read("src/lib/components/layout/user-menu.tsx");
 
-  assert.match(header, /grid-cols-\[minmax\(0,1fr\)_minmax\(0,640px\)_minmax\(0,1fr\)\]/);
+  assert.match(header, /grid-cols-\[minmax\(0,auto\)_minmax\(0,640px\)_minmax\(max-content,1fr\)\]/);
   assert.match(header, /href="\/"/);
   assert.match(header, /displayMode !== "text-only" && renderedIcon/);
   assert.match(header, /displayMode !== "icon-only"/);
   assert.match(header, /name=\{displayName\}/);
   assert.match(header, /const centerContent = children \?\?/);
   assert.match(header, /items-center justify-start/);
-  assert.match(header, /items-center justify-center/);
+  assert.match(header, /ye-mobile-top-center[^"\n]*justify-start/);
   assert.match(header, /items-center justify-end gap-1/);
   assert.doesNotMatch(header, /absolute left-0/);
   assert.doesNotMatch(header, /calc\(100% - 200px\)/);

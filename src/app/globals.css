@@ -1,6 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+@font-face {
+  font-family: "IBM Plex Sans";
+  src: url("/fonts/IBMPlexSans.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 100 700;
+  font-stretch: 75% 100%;
+  font-display: swap;
+}
+
+
 /* Scan Canvas SDK source for Tailwind classes used in shared components */
 @source "../../../../YouEye-Canvas/src";
 
@@ -33,7 +43,7 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
+  --background: oklch(0.985 0 0);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -54,12 +64,12 @@
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
+  --background: oklch(0.13 0 0);
   --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
+  --card: oklch(0.17 0 0);
   --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover: oklch(0.17 0 0);
+  --popover-foreground: oklch(0.985 0 0);
   --primary: oklch(0.922 0 0);
   --primary-foreground: oklch(0.205 0 0);
   --secondary: oklch(0.269 0 0);
@@ -80,12 +90,13 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: system-ui, -apple-system, sans-serif;
-    font-size: 14px;
+    font-family: "IBM Plex Sans", system-ui, sans-serif;
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
   }
 }
 
-/* Animated gradient border for homepage search bar */
+/* The landing page keeps its original animated field; result controls are separate. */
 @keyframes gradient-shift {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -94,6 +105,21 @@
   background-size: 200% 200%;
   animation: gradient-shift 6s ease infinite;
 }
+
+/* Search workspace: useful reading measure and a left-aligned results column. */
+.search-home { max-width: 76rem; margin: 0 auto; padding: clamp(3rem, 12vh, 9rem) 1.5rem 5rem; }
+.search-content { padding-left: 1.5rem; padding-right: 1.5rem; }
+.search-field { display: flex; align-items: center; min-height: 44px; gap: 2px; border: 1px solid var(--input); border-radius: 12px; background: var(--card); padding-right: 3px; }
+.search-field:focus-within { outline: 2px solid var(--ring); outline-offset: 2px; }
+.search-field-large { min-height: 56px; box-shadow: 0 3px 16px oklch(0 0 0 / 3%); }
+.search-field input::-webkit-search-cancel-button { display: none; }
+.search-icon-button, .search-submit { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 36px; min-height: 36px; border-radius: 9px; }
+.search-icon-button { color: var(--muted-foreground); }
+.search-icon-button:hover { background: var(--accent); }
+.search-submit { background: var(--primary); color: var(--primary-foreground); }
+.search-field-large .search-submit, .search-field-large .search-icon-button { min-height: 44px; width: 44px; }
+@media (min-width: 1024px) { .search-content { padding-left: 8rem; } }
+@media (max-width: 640px), (display-mode: standalone) { .search-home { padding: 3rem 1rem; } .search-content { padding-left: 1rem; padding-right: 1rem; } }
 
 /* Masonry image grid */
 .masonry-grid {
@@ -139,3 +165,12 @@ body.embed-mode { background: transparent; }
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
+
+/* Shared YouEye typography and keyboard access; platform theme values remain authoritative. */
+:where(button, a, input, select, textarea):focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+.search-mobile-query { display: none; }
+@media (max-width: 640px), (display-mode: standalone) { .search-mobile-query { display: block; } }

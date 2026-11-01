@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations as useInterfaceTranslations } from "next-intl";
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import {
@@ -36,11 +37,14 @@ interface SearchResultsProps {
 }
 
 export function SearchResults({ query, page, category }: SearchResultsProps) {
+  const translateInterface = useInterfaceTranslations("interface");
+
   const [data, setData] = useState<SearchResponse | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setFailure] = useState<"session" | "permission" | "engine" | "network" | null>(null);
   const [loading, setLoading] = useState(true);
   const [providers, setProviders] = useState<LinkHandlerProvider[]>([]);
   const providersFetchedRef = useRef(false);
+  const requestRef = useRef<AbortController | null>(null);
 
   // Fetch link handler providers once
   useEffect(() => {
@@ -54,30 +58,35 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
   }, []);
 
   const fetchResults = useCallback(async () => {
+    requestRef.current?.abort();
+    const controller = new AbortController();
+    requestRef.current = controller;
     setLoading(true);
-    setError(null);
+    setFailure(null);
     setData(null);
     try {
       const params = new URLSearchParams({ q: query, page: String(page) });
       if (category && category !== "general" && category !== "search") {
         params.set("category", category);
       }
-      const res = await fetch(`/api/search?${params}`);
+      const res = await fetch(`/api/search?${params}`, { signal: controller.signal });
       const json = await res.json();
+      if (controller.signal.aborted) return;
       if (!res.ok || json.error) {
-        setError(json.error || `Search returned ${res.status}`);
+        setFailure(res.status === 401 ? "session" : res.status === 403 ? "permission" : "engine");
       } else {
         setData(json);
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Search engine unreachable");
+    } catch {
+      if (!controller.signal.aborted) setFailure("network");
     } finally {
-      setLoading(false);
+      if (!controller.signal.aborted) setLoading(false);
     }
   }, [query, page, category]);
 
   useEffect(() => {
     fetchResults();
+    return () => requestRef.current?.abort();
   }, [fetchResults]);
 
   const results = data?.results ?? [];
@@ -98,7 +107,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
   return (
     <>
       {/* Content area — two-column layout */}
-      <div className="flex gap-8 px-4 py-6 lg:px-[5%] xl:px-[10%]">
+      <div className="search-content flex gap-8 py-6">
         {/* Main column */}
         <div className="min-w-0 w-full max-w-[640px] lg:flex-1">
           {/* Loading skeleton */}
@@ -106,18 +115,17 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
 
           {/* Error state */}
           {!loading && error && (
-            <div className="mb-6 flex items-start gap-3 rounded-lg border border-amber-500/30 bg-amber-500/10 p-4">
+            <div role="alert" className="mb-6 flex items-start gap-3 rounded-xl border border-border bg-card p-5">
               <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-500" />
               <div className="min-w-0 flex-1 break-words">
-                <p className="font-medium text-foreground">Search unavailable</p>
-                <p className="mt-1 text-sm text-muted-foreground">{error}</p>
+                <p className="font-medium text-foreground">{translateInterface("m23ae806319e9")}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{translateInterface(({ session: "m96959c516d74", permission: "ma7d6257ee477", engine: "m3a29dfc45c04", network: "mac9404244a3f" } as Record<string, string>)[error])}</p>
                 <button
                   onClick={fetchResults}
                   className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-4 py-1.5 text-sm font-medium text-foreground hover:bg-accent transition-colors"
                 >
                   <RefreshCw className="h-3.5 w-3.5" />
-                  Retry
-                </button>
+                  {translateInterface("m942087cc2d41")}</button>
               </div>
             </div>
           )}
@@ -125,7 +133,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
           {/* Spelling corrections */}
           {!loading && corrections.length > 0 && (
             <div className="mb-4 text-sm text-muted-foreground">
-              Did you mean:{" "}
+              {translateInterface("m79f023b6989d")}{" "}
               {corrections.map((c, i) => (
                 <span key={c}>
                   {i > 0 && ", "}
@@ -145,8 +153,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
             <div className="mb-6 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/30 p-4">
               <div className="mb-1.5 flex items-center gap-2 text-xs font-medium text-blue-600 dark:text-blue-400">
                 <Sparkles className="h-3.5 w-3.5" />
-                Instant answer
-              </div>
+                {translateInterface("mfb16e0569799")}</div>
               {answers.map((a, i) => (
                 <p key={i} className="text-lg font-medium text-foreground">
                   {typeof a === "string" ? a : (a as { answer?: string }).answer ?? ""}
@@ -193,8 +200,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
                       className="flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
                     >
                       <ChevronLeft className="h-4 w-4" />
-                      Previous
-                    </Link>
+                      {translateInterface("ma57b08a480b8")}</Link>
                   )}
 
                   {Array.from({ length: 5 }, (_, i) => {
@@ -220,8 +226,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
                       href={`/search?q=${encodeURIComponent(query)}&category=${category}&page=${page + 1}`}
                       className="flex items-center gap-1 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-foreground hover:bg-accent transition-colors"
                     >
-                      Next
-                      <ChevronRight className="h-4 w-4" />
+                      {translateInterface("m1ff57a29d7c9")}<ChevronRight className="h-4 w-4" />
                     </Link>
                   )}
                 </nav>
@@ -233,10 +238,9 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
           {!loading && results.length === 0 && !error && (
             <div className="mt-12 flex flex-col items-center text-center">
               <Search className="mb-4 h-12 w-12 text-muted-foreground/40" />
-              <p className="text-lg font-medium text-foreground">No results found</p>
+              <p className="text-lg font-medium text-foreground">{translateInterface("m7d7e36058609")}</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                Try different keywords or check your search engine connection.
-              </p>
+                {translateInterface("mf1978d41eb9f")}</p>
             </div>
           )}
         </div>
@@ -252,8 +256,7 @@ export function SearchResults({ query, page, category }: SearchResultsProps) {
               {data && (
                 <div className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground/50">
                   <Lightbulb className="h-3 w-3" />
-                  Powered by SearXNG
-                </div>
+                  {translateInterface("mccf2a28f72c6")}</div>
               )}
             </>
           )}

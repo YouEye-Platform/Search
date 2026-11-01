@@ -12,6 +12,7 @@
  * iframe so the providing app can render responsively.
  */
 
+import { useTranslations as useInterfaceTranslations } from "next-intl";
 import { useEffect, useState, useRef, useCallback } from "react";
 import type { SearchResult } from "@/lib/search";
 
@@ -113,6 +114,7 @@ function InfoCardIframe({
   visible: boolean;
   containerWidth: number;
 }) {
+  const translateInterface = useInterfaceTranslations("interface");
   const [ready, setReady] = useState(false);
   const [iframeHeight, setIframeHeight] = useState<number | null>(null);
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -197,7 +199,7 @@ function InfoCardIframe({
         scrolling="no"
         sandbox="allow-scripts allow-same-origin allow-popups allow-top-navigation"
         loading="lazy"
-        title={`${match.provider.app_name} info card`}
+        title={translateInterface("m61dfd1eadd48", { app: match.provider.app_name })}
       />
     </div>
   );

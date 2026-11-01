@@ -29,7 +29,7 @@ test("Search publishes canonical surfaces in runtime and install manifests", () 
   assert.match(route, /triggers: \["search-query"\]/);
   assert.doesNotMatch(route, /\n\s+widgets:\s*\[/);
 
-  assert.match(route, /version: packageJson\.version/);
+  assert.match(route, /buildVersion: packageJson\.version/);
   assert.match(yaml, versionPattern());
   assert.match(yaml, /surfaceSchemaVersion: 1/);
   assert.match(yaml, /- id: quick-search/);

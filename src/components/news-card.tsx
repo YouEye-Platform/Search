@@ -1,3 +1,5 @@
+"use client";
+import {useLocale} from "next-intl";
 import type { SearchResult } from "@/lib/search";
 import { ExternalLink } from "lucide-react";
 import { DomainIcon } from "@/components/domain-icon";
@@ -10,30 +12,21 @@ function formatDomain(url: string): string {
   }
 }
 
-function timeAgo(dateStr: string): string {
-  try {
-    const d = new Date(dateStr);
-    const now = Date.now();
-    const diff = now - d.getTime();
-    if (diff < 0) return "just now";
-    const mins = Math.floor(diff / 60_000);
-    if (mins < 60) return `${mins}m ago`;
-    const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`;
-    const days = Math.floor(hrs / 24);
-    if (days < 30) return `${days}d ago`;
-    return d.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
-  } catch {
-    return "";
-  }
+function timeAgo(dateStr: string, locale: string): string {
+  const date = new Date(dateStr);
+  if (!Number.isFinite(date.getTime())) return "";
+  const seconds = (date.getTime() - Date.now()) / 1000;
+  const format = new Intl.RelativeTimeFormat(locale, {numeric: "auto"});
+  if (Math.abs(seconds) < 60) return format.format(0, "second");
+  if (Math.abs(seconds) < 3600) return format.format(Math.round(seconds / 60), "minute");
+  if (Math.abs(seconds) < 86400) return format.format(Math.round(seconds / 3600), "hour");
+  if (Math.abs(seconds) < 2592000) return format.format(Math.round(seconds / 86400), "day");
+  return new Intl.DateTimeFormat(locale, {dateStyle: "medium"}).format(date);
 }
 
 export function NewsCard({ result }: { result: SearchResult }) {
   const domain = formatDomain(result.url);
+  const locale = useLocale();
 
   return (
     <a
@@ -51,7 +44,7 @@ export function NewsCard({ result }: { result: SearchResult }) {
             <>
               <span className="text-xs text-muted-foreground/40">&bull;</span>
               <span className="text-xs text-muted-foreground">
-                {timeAgo(result.publishedDate)}
+                {timeAgo(result.publishedDate, locale)}
               </span>
             </>
           )}

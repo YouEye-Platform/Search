@@ -1,10 +1,15 @@
-import { createManifestHandler } from "@/lib/routes/manifest";
+import { installedRelease } from "@/lib/installed-release";
+import { NextResponse } from "next/server";
 import packageJson from "../../../../package.json";
 
-export const GET = createManifestHandler({
+export async function GET() {
+  const release = await installedRelease("search", packageJson.version);
+  return NextResponse.json({
   id: "ye-search",
   name: "Search",
-  version: packageJson.version,
+  version: release?.version ?? "unknown",
+    buildVersion: packageJson.version,
+    release,
   description: "Privacy-respecting web search powered by your connected search engine",
   icon: "Search",
   accent_color: "#f59e0b",
@@ -113,3 +118,4 @@ export const GET = createManifestHandler({
     ],
   },
 });
+}

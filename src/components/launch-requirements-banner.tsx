@@ -1,3 +1,4 @@
+import { useTranslations as useInterfaceTranslations } from "next-intl";
 import { ShieldCheck } from "lucide-react";
 import type { LaunchRequirements } from "@/lib/types";
 
@@ -6,6 +7,8 @@ interface LaunchRequirementsBannerProps {
 }
 
 export function LaunchRequirementsBanner({ requirements }: LaunchRequirementsBannerProps) {
+  const translateInterface = useInterfaceTranslations("interface");
+
   if (!requirements?.approval_required || !requirements.approval_url_absolute) return null;
 
   const permissions = requirements.permissions ?? requirements.required_permissions ?? [];
@@ -16,7 +19,7 @@ export function LaunchRequirementsBanner({ requirements }: LaunchRequirementsBan
         <div className="flex items-start gap-3">
           <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0" />
           <div>
-            <p className="text-sm font-medium">Search needs permission to finish setup</p>
+            <p className="text-sm font-medium">{translateInterface("m228319327656")}</p>
             <p className="mt-1 text-xs opacity-80">
               {permissions.map((permission) => permission.title).join(", ")}
             </p>
@@ -26,8 +29,7 @@ export function LaunchRequirementsBanner({ requirements }: LaunchRequirementsBan
           href={requirements.approval_url_absolute}
           className="inline-flex h-9 items-center justify-center rounded-md bg-amber-900 px-4 text-sm font-medium text-white transition-colors hover:bg-amber-800 dark:bg-amber-200 dark:text-amber-950 dark:hover:bg-amber-100"
         >
-          Allow
-        </a>
+          {translateInterface("me213c161d5ce")}</a>
       </div>
     </section>
   );

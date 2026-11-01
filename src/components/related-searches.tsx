@@ -1,3 +1,4 @@
+import { useTranslations as useInterfaceTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import Link from "next/link";
 
@@ -8,13 +9,14 @@ export function RelatedSearches({
   suggestions: string[];
   category: string;
 }) {
+  const translateInterface = useInterfaceTranslations("interface");
+
   if (!suggestions.length) return null;
 
   return (
     <div className="rounded-lg border border-border bg-card p-4">
       <h3 className="mb-3 text-sm font-medium text-foreground">
-        Related searches
-      </h3>
+        {translateInterface("m1c1fd5130afe")}</h3>
       <div className="flex flex-wrap gap-2">
         {suggestions.map((s) => (
           <Link

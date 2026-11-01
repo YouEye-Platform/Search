@@ -1,3 +1,5 @@
+import { getTranslations as getInterfaceTranslations } from "next-intl/server";
+import { useTranslations as useInterfaceTranslations } from "next-intl";
 import { Search } from "lucide-react";
 
 interface WidgetPageProps {
@@ -5,6 +7,8 @@ interface WidgetPageProps {
 }
 
 export default async function WidgetPage({ params }: WidgetPageProps) {
+  const translateInterface = await getInterfaceTranslations("interface");
+
   const { widgetId } = await params;
 
   if (widgetId === "quick-search") {
@@ -13,12 +17,14 @@ export default async function WidgetPage({ params }: WidgetPageProps) {
 
   return (
     <div className="flex h-full items-center justify-center p-4 text-sm text-muted-foreground">
-      Unknown widget: {widgetId}
+      {translateInterface("m05ac5fdd1798")}{" "}{widgetId}
     </div>
   );
 }
 
 function QuickSearchWidget() {
+  const translateInterface = useInterfaceTranslations("interface");
+
   return (
     <div className="flex h-full items-center justify-center p-3">
       <form
@@ -31,7 +37,7 @@ function QuickSearchWidget() {
         <input
           type="text"
           name="q"
-          placeholder="Search the web..."
+          placeholder={translateInterface("me5e6bff7707c")}
           className="w-full rounded-full border border-border bg-surface py-2 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground outline-none focus:border-primary focus:shadow-sm transition-all"
         />
       </form>

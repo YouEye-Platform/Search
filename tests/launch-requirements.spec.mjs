@@ -23,6 +23,8 @@ test("Search surfaces launch requirements before using declared permissions", ()
   assert.match(layout, /api\.getLaunchRequirements\(session\.userId, process\.env\.SEARCH_EXTERNAL_URL/);
   assert.match(layout, /LaunchRequirementsBanner/);
   assert.match(banner, /approval_url_absolute/);
-  assert.match(banner, /Search needs permission to finish setup/);
+  assert.match(banner, /translateInterface\("m228319327656"\)/);
+  const english = JSON.parse(read("messages/en.json"));
+  assert.equal(english.interface.m228319327656, "Search needs permission to finish setup");
   assert.match(types, /export interface LaunchRequirements/);
 });
