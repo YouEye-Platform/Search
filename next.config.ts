@@ -12,6 +12,7 @@ const withSerwist = withSerwistInit({
 });
 
 const nextConfig: NextConfig = {
+  env: { YOUEYE_VERSION: process.env.YOUEYE_VERSION || "0.0.0" },
   generateBuildId: async () => process.env.YOUEYE_BUILD_ID || null,
   output: "standalone" as const,
 };

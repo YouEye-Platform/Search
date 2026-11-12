@@ -1,15 +1,11 @@
-import { installedRelease } from "@/lib/installed-release";
 import { NextResponse } from "next/server";
-import packageJson from "../../../../package.json";
+import { BUILD_VERSION } from "@/lib/build-version";
 
 export async function GET() {
-  const release = await installedRelease("search", packageJson.version);
   return NextResponse.json({
   id: "ye-search",
   name: "Search",
-  version: release?.version ?? "unknown",
-    buildVersion: packageJson.version,
-    release,
+  version: BUILD_VERSION,
   description: "Privacy-respecting web search powered by your connected search engine",
   icon: "Search",
   accent_color: "#f59e0b",
