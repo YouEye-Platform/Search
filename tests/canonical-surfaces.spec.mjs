@@ -31,14 +31,12 @@ test("Search publishes canonical surfaces in runtime and install manifests", () 
 
   assert.match(route, /version: BUILD_VERSION/);
   assert.match(yaml, versionPattern());
-  assert.match(yaml, /surfaceSchemaVersion: 1/);
+  assert.match(yaml, /^schema: youeye\.app\.v1$/m);
   assert.match(yaml, /- id: quick-search/);
   assert.match(yaml, /kind: settings-panel/);
   assert.match(yaml, /kind: timeline-card/);
-  assert.match(yaml, /- search-link-clicked/);
-  assert.match(yaml, /proxy:\n\s+paths:\n\s+- \/search\*/);
-  assert.match(yaml, /- \/autocompleter\*/);
-  assert.match(yaml, /methods:\n\s+- GET/);
+  assert.match(yaml, /triggers: \[[^\]]*\bsearch-link-clicked\b/);
+  assert.match(yaml, /proxy: \{paths: \[\/search\*, \/autocompleter\*\], methods: \[GET\]\}/);
   assert.match(route, /proxy:\s*\{/);
   assert.match(route, /paths: \["\/search\*", "\/autocompleter\*"\]/);
   assert.match(route, /methods: \["GET"\]/);
