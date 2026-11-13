@@ -49,7 +49,7 @@ test("Search declares the Wave 3A surface contract", () => {
   assert.doesNotMatch(infoHost, /youeye-card-ready|contentHeight/);
 });
 
-test("Search runtime source no longer emits legacy embed messages", () => {
+test("Search runtime source emits no removed embed message types", () => {
   const combined = sourceFiles("src").map((file) => read(file)).join("\n");
   assert.doesNotMatch(combined, /youeye-embed-ready|youeye-embed-resize|youeye-card-ready|youeye-app-settings-resize|contentHeight|settings\?embed=true/);
 });
