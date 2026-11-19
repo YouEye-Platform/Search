@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { BUILD_VERSION } from "@/lib/build-version";
+import { APP_VERSION } from "@/lib/app-version";
 
 export async function GET() {
   return NextResponse.json({
   id: "ye-search",
   name: "Search",
-  version: BUILD_VERSION,
+  version: APP_VERSION,
   description: "Privacy-respecting web search powered by your connected search engine",
   icon: "Search",
   accent_color: "#f59e0b",
